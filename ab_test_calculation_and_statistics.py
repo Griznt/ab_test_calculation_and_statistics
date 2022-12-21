@@ -9,8 +9,6 @@ plt.style.use('default')
 plt.style.use('dark_background')
 
 from scipy.stats import ttest_ind, mannwhitneyu, probplot
-# from tqdm.notebook import tqdm
-from tqdm import tqdm
  
 import pylab
 
@@ -25,8 +23,8 @@ def compare_distributions(_a,_b,features,silent=False):
     sample_size = 3000
     t = []
     
-    for feature in tqdm(features):
-        for _ in tqdm(range(n)):
+    for feature in features:
+        for _ in range(n):
             a = _a[feature].sample(sample_size, replace=True)
             b = _b[feature].sample(sample_size, replace=True)
             _, pval = ttest_ind(a,b,equal_var=False)
@@ -39,7 +37,7 @@ def compare_distributions(_a,_b,features,silent=False):
     
     if(silent == False):
         print('=========================')
-        print('result', t.sum())
+        print('result', sum(t))
         print('users count', len(_a), len(_b))
         print('=========================')
     return t
@@ -87,7 +85,7 @@ def calculate_power(_a,_b,feature,test=ttest_ind):
     result = []
     n = 10000
     sample_size = 5000
-    for _ in tqdm(range(n)):
+    for _ in range(n):
       pval=1
       a = _a[feature].sample(sample_size, replace=True)
       b = _b[feature].sample(sample_size, replace=True)
@@ -121,19 +119,19 @@ def calculate_pval(a,b,feature,test=ttest_ind):
 # a-test group pandas dataframe
 # b-control group pandas dataframe
 # feature - metric
-# treshold - Power from 0 to 1
-def get_statistics(a,b,feature,treshold=0.8):
+# threshold - Power from 0 to 1
+def get_statistics(a,b,feature,threshold=0.8):
     change = get_change(a,b,feature)
     test = ttest_ind
     power = calculate_power(a,b,feature,test=test)
     pval = 1
-    if power < treshold:
+    if power < threshold:
         test = mannwhitneyu
-        print(f'Power of T test is less than {treshold*100}%')
+        print(f'Power of T test is less than {threshold*100}%')
     power = calculate_power(a,b,feature,test=test)
-    if power < treshold:
-        print(f'Power of MannWhitney U test is less than {treshold*100}%')
-        print(f'Мы не можем задетектить изменение {round(change,2)} для {feature} c мощностью от {treshold*100}%')
+    if power < threshold:
+        print(f'Power of MannWhitney U test is less than {threshold*100}%')
+        print(f'Мы не можем задетектить изменение {round(change,2)} для {feature} c мощностью от {threshold*100}%')
         return False
     result = calculate_pval(a,b,feature,test=test)
     if result==False:
